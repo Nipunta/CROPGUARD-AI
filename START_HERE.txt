@@ -1,0 +1,12 @@
+HOW TO USE 
+========== 
+ 
+1. Double-click "web_interface.html" to open in browser 
+2. Fill in the form with crop details 
+3. Click "Analyze & Get Recommendations" 
+ 
+For Python version: 
+- Run: python crop_residue_analyzer.py 
+ 
+See README.md for full documentation 
+See deploy_instructions.md for online hosting options 

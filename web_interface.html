@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Residue Analyzer - Farmer's Tool</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #2d3748;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2d3748;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 8px;
+            display: none;
+        }
+        .result h2 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 22px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .result h3 {
+            color: #2d3748;
+            margin: 20px 0 10px 0;
+            font-size: 18px;
+        }
+        .option-card {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+        .badge-success { background: #c6f6d5; color: #22543d; }
+        .badge-warning { background: #feebc8; color: #7c2d12; }
+        .badge-info { background: #bee3f8; color: #2c5282; }
+        .chart-container {
+            margin: 20px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+        }
+        .bar-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .bar-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .bar-label {
+            min-width: 150px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .bar-wrapper {
+            flex: 1;
+            background: #e2e8f0;
+            border-radius: 8px;
+            height: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        .bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-weight: 600;
+            font-size: 12px;
+            transition: width 1s ease;
+        }
+        .pie-chart {
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            border-radius: 50%;
+            background: conic-gradient(
+                #48bb78 0deg 180deg,
+                #f56565 180deg 360deg
+            );
+            position: relative;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .pie-legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 15px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        .subsidy-card {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border-left: 4px solid #0284c7;
+        }
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .contact-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+        }
+        .contact-card h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        .contact-card p {
+            margin: 5px 0;
+            font-size: 13px;
+            color: #4a5568;
+        }
+        .action-steps {
+            counter-reset: step-counter;
+            list-style: none;
+            padding: 0;
+        }
+        .action-steps li {
+            counter-increment: step-counter;
+            padding: 15px;
+            margin: 10px 0;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #48bb78;
+            position: relative;
+            padding-left: 60px;
+        }
+        .action-steps li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #48bb78;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .print-btn {
+            background: #48bb78;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 14px;
+        }
+        .print-btn:hover {
+            background: #38a169;
+        }
+        @media print {
+            body { background: white; }
+            .container { box-shadow: none; }
+            form, .print-btn { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌾 Crop Residue Analyzer</h1>
+        <p class="subtitle">Smart solution for sustainable farming</p>
+        
+        <form id="analyzerForm">
+            <div class="form-group">
+                <label>Crop Type</label>
+                <select id="cropType" required>
+                    <option value="">Select crop</option>
+                    <option value="Rice">Rice (धान)</option>
+                    <option value="Wheat">Wheat (गेहूं)</option>
+                    <option value="Sugarcane">Sugarcane (गन्ना)</option>
+                    <option value="Cotton">Cotton (कपास)</option>
+                    <option value="Maize">Maize (मक्का)</option>
+                </select>
+            </div>
+            
+            <div class="row">
+                <div class="form-group">
+                    <label>Land Size (acres)</label>
+                    <input type="number" id="landSize" required min="0.5" step="0.5">
+                </div>
+                <div class="form-group">
+                    <label>Residue Quantity (tons)</label>
+                    <input type="number" id="residueQty" required min="1" step="0.5">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Location (State/District)</label>
+                <input type="text" id="location" required placeholder="e.g., Ludhiana, Punjab">
+            </div>
+            
+            <div class="row">
+                <div class="form-group">
+                    <label>Distance to Plant (km)</label>
+                    <input type="number" id="distance" required min="0">
+                </div>
+                <div class="form-group">
+                    <label>Budget (₹)</label>
+                    <input type="number" id="budget" required min="0" step="1000">
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="form-group">
+                    <label>Labor Availability</label>
+                    <select id="labor" required>
+                        <option value="Low">Low</option>
+                        <option value="Medium">Medium</option>
+                        <option value="High">High</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Transport Access</label>
+                    <select id="transport" required>
+                        <option value="Poor">Poor</option>
+                        <option value="Good">Good</option>
+                        <option value="Excellent">Excellent</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button type="submit">Analyze & Get Recommendations</button>
+        </form>
+        
+        <div class="result" id="result">
+            <button class="print-btn" onclick="window.print()">🖨️ Print Report</button>
+            <button class="print-btn" onclick="downloadPDF()">📄 Download PDF</button>
+            <h2>📊 Analysis Results</h2>
+            <div id="resultContent"></div>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('analyzerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const data = {
+                cropType: document.getElementById('cropType').value,
+                landSize: parseFloat(document.getElementById('landSize').value),
+                residueQty: parseFloat(document.getElementById('residueQty').value),
+                location: document.getElementById('location').value,
+                distance: parseFloat(document.getElementById('distance').value),
+                budget: parseFloat(document.getElementById('budget').value),
+                labor: document.getElementById('labor').value,
+                transport: document.getElementById('transport').value
+            };
+            
+            analyzeData(data);
+        });
+        
+        function analyzeData(data) {
+            const result = document.getElementById('result');
+            const content = document.getElementById('resultContent');
+            
+            // Calculate options with detailed logic
+            const options = calculateOptions(data);
+            const topOptions = options.sort((a, b) => b.feasibility - a.feasibility).slice(0, 3);
+            const best = topOptions[0];
+            
+            // Calculate carbon impact
+            const burningEmission = data.residueQty * 1500;
+            const savingEmission = data.residueQty * 1200;
+            const netReduction = savingEmission;
+            
+            // Get subsidies based on location
+            const subsidies = getSubsidies(data.location, best.method);
+            
+            // Get contacts based on location
+            const contacts = getContacts(data.location);
+            
+            content.innerHTML = `
+                <div class="option-card">
+                    <h3>✅ Best Recommendation: ${best.method}</h3>
+                    <p><span class="badge badge-success">Feasibility: ${best.feasibility}%</span></p>
+                    <p><strong>Setup Cost:</strong> ₹${best.setupCost.toLocaleString()}</p>
+                    <p><strong>Expected Returns:</strong> ₹${best.revenue.toLocaleString()}</p>
+                    <p><strong>Payback Period:</strong> ${best.payback} months</p>
+                    <p><strong>Effort Required:</strong> ${best.effort}</p>
+                </div>
+                
+                <h2>📊 Feasibility Comparison Chart</h2>
+                <div class="chart-container">
+                    <div class="bar-chart">
+                        ${topOptions.map(opt => `
+                            <div class="bar-item">
+                                <div class="bar-label">${opt.method}</div>
+                                <div class="bar-wrapper">
+                                    <div class="bar-fill" style="width: ${opt.feasibility}%">${opt.feasibility}%</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <h2>💰 Financial Comparison</h2>
+                <div class="chart-container">
+                    <div class="bar-chart">
+                        ${topOptions.map(opt => `
+                            <div class="bar-item">
+                                <div class="bar-label">${opt.method}</div>
+                                <div class="bar-wrapper">
+                                    <div class="bar-fill" style="width: ${(opt.revenue / Math.max(...topOptions.map(o => o.revenue))) * 100}%">
+                                        ₹${(opt.revenue / 1000).toFixed(0)}K
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <h2>🌍 Environmental Impact</h2>
+                <div class="option-card">
+                    <div style="text-align: center;">
+                        <div class="pie-chart"></div>
+                        <div class="pie-legend">
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #48bb78;"></div>
+                                <span>CO2 Saved: ${savingEmission.toLocaleString()} kg</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #f56565;"></div>
+                                <span>If Burned: ${burningEmission.toLocaleString()} kg</span>
+                            </div>
+                        </div>
+                        <p style="margin-top: 20px; font-size: 18px; color: #48bb78; font-weight: bold;">
+                            🌳 Equivalent to planting ${Math.floor(netReduction / 20)} trees!
+                        </p>
+                    </div>
+                </div>
+                
+                <h2>💼 Available Government Subsidies & Schemes</h2>
+                ${subsidies.map(scheme => `
+                    <div class="subsidy-card">
+                        <h3 style="color: #0284c7; margin-bottom: 10px;">${scheme.name}</h3>
+                        <p><strong>Type:</strong> ${scheme.type}</p>
+                        <p><strong>Subsidy Amount:</strong> ${scheme.subsidy}</p>
+                        <p><strong>Applicable For:</strong> ${scheme.applicableFor}</p>
+                        <p><strong>Eligibility:</strong> ${scheme.eligibility}</p>
+                        <p><strong>How to Apply:</strong> ${scheme.howToApply}</p>
+                        <p><strong>Documents Required:</strong> ${scheme.documents}</p>
+                        ${scheme.website ? `<p><strong>Website:</strong> <a href="${scheme.website}" target="_blank">${scheme.website}</a></p>` : ''}
+                    </div>
+                `).join('')}
+                
+                <h2>📞 Important Contact Information</h2>
+                <div class="contact-grid">
+                    ${contacts.map(contact => `
+                        <div class="contact-card">
+                            <h4>${contact.name}</h4>
+                            <p>📞 ${contact.phone}</p>
+                            ${contact.email ? `<p>📧 ${contact.email}</p>` : ''}
+                            ${contact.address ? `<p>📍 ${contact.address}</p>` : ''}
+                            ${contact.timings ? `<p>🕐 ${contact.timings}</p>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <h2>📋 Step-by-Step Action Plan</h2>
+                <div class="option-card">
+                    <ul class="action-steps">
+                        ${getActionPlan(best.method, data).map(step => `<li>${step}</li>`).join('')}
+                    </ul>
+                </div>
+                
+                <div class="option-card" style="background: #fffbeb; border-left-color: #f59e0b;">
+                    <h3 style="color: #f59e0b;">⚠️ Important Tips</h3>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>Start the process within 2-3 weeks after harvest</li>
+                        <li>Keep all receipts and documents for subsidy claims</li>
+                        <li>Join farmer cooperatives for better equipment access</li>
+                        <li>Attend training programs at KVK for technical guidance</li>
+                        <li>Never burn crop residue - it's illegal and harmful</li>
+                    </ul>
+                </div>
+            `;
+            
+            result.style.display = 'block';
+            result.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function calculateOptions(data) {
+            const options = [];
+            
+            // Mulching
+            let mulchFeasibility = 85;
+            let mulchCost = 8000;
+            if (data.machinery) {
+                mulchCost = 2000;
+                mulchFeasibility = 95;
+            }
+            options.push({
+                method: 'Mulching/Incorporation',
+                feasibility: mulchFeasibility,
+                setupCost: mulchCost,
+                revenue: data.landSize * 3000,
+                payback: 3,
+                effort: 'Low'
+            });
+            
+            // Biomass Resale
+            let biomassFeasibility = 80;
+            let biomassCost = 5000;
+            if (data.distance > 50) {
+                biomassFeasibility -= 25;
+                biomassCost += data.distance * 100;
+            }
+            options.push({
+                method: 'Biomass Resale',
+                feasibility: biomassFeasibility,
+                setupCost: biomassCost,
+                revenue: data.residueQty * 2500,
+                payback: 1,
+                effort: 'Low'
+            });
+            
+            // Composting
+            let compostFeasibility = 70;
+            if (data.labor === 'Low') compostFeasibility -= 20;
+            options.push({
+                method: 'Composting',
+                feasibility: compostFeasibility,
+                setupCost: 15000 + (data.residueQty * 500),
+                revenue: data.residueQty * 3000,
+                payback: 6,
+                effort: 'Medium'
+            });
+            
+            // Biogas
+            let biogasFeasibility = 60;
+            if (data.distance < 10) biogasFeasibility += 15;
+            if (data.budget < 80000) biogasFeasibility -= 30;
+            options.push({
+                method: 'Biogas Production',
+                feasibility: Math.max(biogasFeasibility, 30),
+                setupCost: 80000 + (data.residueQty * 2000),
+                revenue: data.residueQty * 5000,
+                payback: 18,
+                effort: 'High'
+            });
+            
+            // Biochar
+            options.push({
+                method: 'Biochar Production',
+                feasibility: 55,
+                setupCost: 45000,
+                revenue: data.residueQty * 4000,
+                payback: 12,
+                effort: 'Medium'
+            });
+            
+            return options;
+        }
+        
+        function getSubsidies(location, method) {
+            const subsidies = [
+                {
+                    name: 'Crop Residue Management (CRM) Scheme',
+                    type: 'Central Government',
+                    subsidy: '50% of equipment cost (up to ₹1 lakh for individuals, ₹10 lakh for cooperatives)',
+                    applicableFor: 'Mulching equipment, balers, rakes',
+                    eligibility: 'All farmers with agricultural land',
+                    howToApply: 'Apply through District Agriculture Office or online portal',
+                    documents: 'Land records, Aadhaar card, Bank account details, Quotation for machinery',
+                    website: 'https://agricoop.nic.in'
+                },
+                {
+                    name: 'PM-KUSUM Scheme',
+                    type: 'Central Government (MNRE)',
+                    subsidy: '60% subsidy on solar pumps and equipment',
+                    applicableFor: 'Biogas plants, biomass processing units',
+                    eligibility: 'Individual farmers, cooperatives, panchayats',
+                    howToApply: 'Apply through State Nodal Agency or MNRE portal',
+                    documents: 'Land ownership proof, Electricity bill, Bank details, Project proposal',
+                    website: 'https://pmkusum.mnre.gov.in'
+                },
+                {
+                    name: 'National Biofuel Policy - Price Support',
+                    type: 'Central Government',
+                    subsidy: 'Minimum Support Price for biomass (₹2000-3000/ton)',
+                    applicableFor: 'Biomass resale to registered plants',
+                    eligibility: 'Farmers selling to OMC-registered biomass plants',
+                    howToApply: 'Direct sale to registered plants, no application needed',
+                    documents: 'Farmer ID, Land records, Sale receipt',
+                    website: 'https://petroleum.nic.in'
+                }
+            ];
+            
+            // Add state-specific schemes
+            if (location.toLowerCase().includes('punjab') || location.toLowerCase().includes('haryana')) {
+                subsidies.push({
+                    name: 'Punjab/Haryana CRM Subsidy',
+                    type: 'State Government',
+                    subsidy: '80% subsidy on machinery (up to ₹1.5 lakh)',
+                    applicableFor: 'Super straw management system, mulchers, balers',
+                    eligibility: 'Farmers in Punjab/Haryana with minimum 2 acres',
+                    howToApply: 'Apply at nearest Agriculture Department office',
+                    documents: 'Land records, Aadhaar, Bank passbook, Machinery quotation',
+                    website: 'https://agripb.gov.in or https://agriharyana.gov.in'
+                });
+            }
+            
+            if (location.toLowerCase().includes('uttar pradesh') || location.toLowerCase().includes('up')) {
+                subsidies.push({
+                    name: 'UP Crop Residue Management Scheme',
+                    type: 'State Government',
+                    subsidy: '50% subsidy (up to ₹80,000 for individuals)',
+                    applicableFor: 'Crop residue management equipment',
+                    eligibility: 'UP farmers with valid land records',
+                    howToApply: 'Online through UP Agriculture portal',
+                    documents: 'Khasra-Khatoni, Aadhaar, Bank details',
+                    website: 'https://upagriculture.com'
+                });
+            }
+            
+            return subsidies;
+        }
+        
+        function getContacts(location) {
+            const contacts = [
+                {
+                    name: 'National Helpline',
+                    phone: '1800-180-1551 (Kisan Call Centre)',
+                    email: 'kisancallcenter@gov.in',
+                    timings: '24x7 Available'
+                },
+                {
+                    name: 'District Agriculture Office',
+                    phone: 'Contact your district office',
+                    address: 'Visit nearest Krishi Bhawan',
+                    timings: 'Mon-Fri: 10 AM - 5 PM'
+                },
+                {
+                    name: 'Krishi Vigyan Kendra (KVK)',
+                    phone: 'Find nearest KVK',
+                    email: 'kvk@icar.gov.in',
+                    address: 'One KVK per district',
+                    timings: 'Mon-Sat: 9 AM - 5 PM'
+                },
+                {
+                    name: 'MNRE (Renewable Energy)',
+                    phone: '011-2436-0707',
+                    email: 'info@mnre.gov.in',
+                    address: 'Block-14, CGO Complex, Lodhi Road, New Delhi',
+                    timings: 'Mon-Fri: 9 AM - 5:30 PM'
+                }
+            ];
+            
+            // Add state-specific contacts
+            if (location.toLowerCase().includes('punjab')) {
+                contacts.push({
+                    name: 'Punjab Agriculture Dept',
+                    phone: '0172-2970605',
+                    email: 'agripb@punjab.gov.in',
+                    address: 'Krishi Bhawan, Chandigarh'
+                });
+            } else if (location.toLowerCase().includes('haryana')) {
+                contacts.push({
+                    name: 'Haryana Agriculture Dept',
+                    phone: '0172-2560106',
+                    email: 'agriharyana@hry.nic.in',
+                    address: 'Krishi Bhawan, Panchkula'
+                });
+            } else if (location.toLowerCase().includes('uttar pradesh') || location.toLowerCase().includes('up')) {
+                contacts.push({
+                    name: 'UP Agriculture Dept',
+                    phone: '0522-2286927',
+                    email: 'agriup@up.gov.in',
+                    address: 'Krishi Bhawan, Lucknow'
+                });
+            }
+            
+            return contacts;
+        }
+        
+        function getActionPlan(method, data) {
+            const plans = {
+                'Mulching/Incorporation': [
+                    'Wait 2-3 weeks after harvest for stubble to dry',
+                    'Contact District Agriculture Office for subsidy application (50% subsidy available)',
+                    'Rent or purchase rotavator/mulcher (₹500-800 per acre rental)',
+                    'Chop residue into 2-3 inch pieces and spread evenly',
+                    'Mix into soil 4-6 inches deep using rotavator',
+                    'Apply decomposer culture (available at KVK) for faster decomposition',
+                    'Irrigate lightly and wait 15-20 days before sowing next crop'
+                ],
+                'Biomass Resale': [
+                    'Contact nearest biomass power plant or pellet manufacturing unit',
+                    'Negotiate price (current market rate: ₹2000-3000 per ton)',
+                    'Apply for transportation subsidy if distance > 25 km',
+                    'Arrange baling machine through cooperative or rental (₹300-500 per acre)',
+                    'Bale the residue tightly (density: 150-200 kg/m³)',
+                    'Arrange tractor/truck for transportation',
+                    'Deliver to plant, get weighment slip and payment receipt for records'
+                ],
+                'Composting': [
+                    'Select shaded area near water source (minimum 10x10 ft space)',
+                    'Apply for composting unit subsidy at Agriculture Department',
+                    'Collect and chop residue into 2-3 inch pieces',
+                    'Layer: 3 parts residue + 1 part cow dung + water (60% moisture)',
+                    'Add decomposer culture (available free at KVK)',
+                    'Turn the pile every 15 days, maintain moisture',
+                    'Harvest compost after 90-120 days, use or sell at ₹3-5 per kg'
+                ],
+                'Biogas Production': [
+                    'Contact MNRE or State Nodal Agency for biogas subsidy (60% available)',
+                    'Get technical training from nearest KVK or biogas plant',
+                    'Install biogas digester (2-4 m³ capacity) with subsidy',
+                    'Mix residue with water and cattle dung (1:1 ratio)',
+                    'Feed digester daily with 25-30 kg fresh mixture',
+                    'Use biogas for cooking (saves ₹300-500/month on LPG)',
+                    'Use slurry as organic fertilizer (rich in NPK)'
+                ],
+                'Biochar Production': [
+                    'Get training on biochar production from Agricultural University',
+                    'Procure or rent biochar kiln (subsidy available under MNRE)',
+                    'Dry the residue completely (moisture < 15%)',
+                    'Load kiln and start controlled pyrolysis (350-500°C)',
+                    'Cool for 24 hours and collect biochar',
+                    'Apply to soil (2-5 tons per hectare) or sell to organic farmers',
+                    'Maintain safety: use in open area, keep water ready'
+                ]
+            };
+            
+            return plans[method] || plans['Mulching/Incorporation'];
+        }
+        
+        function downloadPDF() {
+            alert('PDF download feature: In production version, this would generate a detailed PDF report. For now, please use the Print button and save as PDF from your browser.');
+        }
+    </script>
+</body>
+</html>
